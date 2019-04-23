@@ -1,0 +1,12 @@
+syntax = "proto3";
+message User_AI{
+    string ID = 1;
+    string PSW = 2;
+}
+
+message User_online{
+    string ID = 1;
+    string STD = 2;
+    string IP = 3;
+    string name = 4;
+}
