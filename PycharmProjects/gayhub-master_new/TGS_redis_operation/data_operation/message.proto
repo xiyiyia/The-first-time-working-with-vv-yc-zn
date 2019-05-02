@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+message gm_signup{
+    string ID = 1;
+    string PSW = 2;
+}
+message gm_friend{
+    string SID = 1;
+    string DID = 2;
+}
+message GeneralMessages{
+    string RC = 1;
+    string SC = 2;
+    string DT = 3;
+    string DATA = 4;
+    string SIP = 5;
+    string DIP = 6;
+}
+//done
+message ClientAS{
+    string IDc = 1;
+    string IDtgs = 2;
+    string TS1 = 3;
+}
+
+//done
+//use Ekc en
+message ASClient{
+    string Kctgs = 1;
+    string IDtgs = 2;
+    string TS2 = 3;
+    string Lifetime2 = 4;
+    string Tickettgs = 5;
+}
+//done
+//use Ektgs en
+message Tickettgs{
+    string Kctgs = 1;
+    string IDc = 2;
+    string ADc = 3;
+    string IDtgs = 4;
+    string TS2 = 5;
+    string Lifetime2 = 6;
+}
+//done
+message ClientTGS{
+    string IDv = 1;
+    string Tickettgs = 2;
+    string AuthenticatorC = 3;
+}
+//done
+//use Kctgs en
+message TGSClient{
+    string Kcv = 1;
+    string IDv = 2;
+    string TS4 = 3;
+    string Ticketv = 4;
+}
+//done
+//use Kctgs en
+message AuthenticatorC3{
+    string IDc = 1;
+    string ADc = 2;
+    string TS3 = 3;
+}
+//done
+//use Ekv en
+message Ticketv{
+    string Kcv = 1;
+    string IDc = 2;
+    string ADc = 3;
+    string IDv = 4;
+    string TS4 = 5;
+    string Lifetime4 = 6;
+}
+//done
+message ClientV{
+    string Ticketv = 1;
+    string AuthenticatorC = 2;
+}
+//done
+//use Kcv en
+message AuthenticatorC5{
+    string IDc = 1;
+    string ADc = 2;
+    string TS5 = 3;
+}
+//done
+//use Kcv en
+message VClient{
+    string TS5 = 1;
+}

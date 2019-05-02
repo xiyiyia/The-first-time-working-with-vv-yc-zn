@@ -1,0 +1,6 @@
+syntax = "proto3";
+message User_AI{
+    string ID = 1;
+    string Key_op = 2;
+    string Key_tgs = 3;
+}
