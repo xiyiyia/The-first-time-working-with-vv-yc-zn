@@ -8,3 +8,5 @@ Develop a web-based chat platform based on distributed systems using python
 2019.4.23 08 ：42 暂时改用redis数据库，sql文件夹废用。网络通信中 数据段序列化 使用protoc(protobuf)模块。
 
 曾能：我把kerberos的相对应文件放在文件夹下，然后加密和字符串操作存在AS里面，集调的时候把路径改一下
+
+2019.5.5 12：11 再有哪个铁憨憨创建多级文件夹，三天之内杀了他
