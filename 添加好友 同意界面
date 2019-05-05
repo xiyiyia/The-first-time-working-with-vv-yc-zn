@@ -16,10 +16,10 @@
         layout_addFD.addWidget(self.OK, 3, 1)
         layout_addFD.addWidget(self.NO, 3, 2)
         self.addFD.setLayout(layout_addFD)
-        self.addFD.move(self.pos())
+       # self.addFD.move(self.pos())
         self.addFD.resize(200, 133)
         self.addFD.setWindowFlags(Qt.FramelessWindowHint)
-        self.paintEvent(self)
+       # self.paintEvent(self)
         self.addFD.setStyleSheet("background-color :rgb(253,216,174)")
         self.addFD.show()
 
