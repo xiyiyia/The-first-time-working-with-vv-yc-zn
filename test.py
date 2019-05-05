@@ -415,16 +415,16 @@ class Ui_Form(object):
         self.retranslateUi(Form)
 
         QMetaObject.connectSlotsByName(Form)
-    """
-    def rightMenu(self):
-        rightMenu = QMenu(self.listWidget)
-        removeAction = QAction(u"删除好友", triggered=self.delete_friend)
-        rightMenu.addAction(removeAction)
-
-        addAction = QAction(u"发起聊天",  triggered=self.start2chat)  # 也可以指定自定义对象事件
-        rightMenu.addAction(addAction)
-        rightMenu.exec_(QCursor.pos())
-    """
+        '''
+        def rightMenu(self):
+            rightMenu = QMenu(self.listWidget)
+            removeAction = QAction(u"删除好友", triggered=self.delete_friend)
+            rightMenu.addAction(removeAction)
+    
+            addAction = QAction(u"发起聊天",  triggered=self.start2chat)  # 也可以指定自定义对象事件
+            rightMenu.addAction(addAction)
+            rightMenu.exec_(QCursor.pos())
+        '''
 
     def click_item(self,item):
         QMessageBox.information(self.listWidget, "ListWidget", "你选择了: " + item.text())

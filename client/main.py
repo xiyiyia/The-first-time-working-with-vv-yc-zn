@@ -11,7 +11,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import pyqtSignal, Qt
 import time
 from multiprocessing import Process
-from client.src.Mythread import Thread
+from client.Mythread import Thread
 import json
 
 
@@ -118,6 +118,25 @@ class login(QWidget):
         else:
             reply = QMessageBox.warning(self, "!", "账号或密码输入错误", QMessageBox.Yes)
 
+    def SignUp(self, str_1):
+        json_operation = JO.JsonServer()
+        print("check"+self.result)
+        check_msg = PTB.GeneralMessages()
+        if op.eq(str_1[0:2], "00"):
+            check_msg.ParseFromString(str.encode(str_1[2:]))
+            if op.eq(check_msg.SC, "66666"):
+                reply = QMessageBox.warning(self, "!", "登录成功", QMessageBox.Yes)
+                json_operation.UpdateJson(self.account, check_msg.DATA)
+                # 登录成功
+                # 跳转到聊天界面
+            if op.eq(check_msg.SC, "00001"):
+                reply = QMessageBox.warning(self, "!", "账号或密码输入错误", QMessageBox.Yes)
+                # 登录失败
+            if op.eq(check_msg.SC, "00100"):
+                reply = QMessageBox.warning(self, "!", "账号不存在", QMessageBox.Yes)
+                # 登录失败
+        else:
+            reply = QMessageBox.warning(self, "!", "Isn't the right message", QMessageBox.Yes)
     def update_name(self, addr):
         event_msg = ["0", addr]
        # self.sign_send.emit("0000", event_msg)

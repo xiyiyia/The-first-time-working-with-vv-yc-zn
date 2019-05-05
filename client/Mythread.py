@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtNetwork import QHostInfo
 
-from client.src.Qtcpsocket import MyTcpsocket
+from client.Qtcpsocket import MyTcpsocket
 
 
 class Thread(QThread):

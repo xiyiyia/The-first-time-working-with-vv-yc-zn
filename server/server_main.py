@@ -18,6 +18,9 @@ import server.server_redis_operation.redis_operation as redis_operation
 import server.server_redis_operation.server_message_creat as server_message_creat
 import logging
 
+import redis
+import server.server_redis_operation.server_redis_pb2 as SRPTB
+
 from server.Tcpserver import Tcpserver
 from PyQt5.QtNetwork import QHostAddress
 
@@ -25,12 +28,22 @@ PATH = '~/gayhub/bin/'
 
 
 class Ui_Server(QObject):
-    sign_send = pyqtSignal(str, str)
+    sign_send = pyqtSignal(str)
     sign_signin = pyqtSignal(str)
     sign_uploadfile = pyqtSignal(str)
     sign_message_deal = pyqtSignal(str)
 
     def setupUi(self, Server):
+
+        self.r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=False)
+        self.the_user_data = SRPTB.User()
+        self.the_user_data.ID = '1024'
+        self.the_user_data.PSW = '1024'
+        self.the_user_data.IP = '1'
+        self.the_user_data.STD = 0
+        self.r.set('1024', self.the_user_data.SerializeToString())
+        self.r.save()
+
         Server.setObjectName("Server")
         Server.resize(431, 322)
         self.centralwidget = QtWidgets.QWidget(Server)
@@ -58,33 +71,11 @@ class Ui_Server(QObject):
         QtCore.QMetaObject.connectSlotsByName(Server)
 
     def server_pack(self, event_msg):
-        try1 = message_pb2.GeneralMessages()
-        try1_data = message_pb2.gm_signup()
-        try1_data.ID = '1024'
-        try1_data.PSW = '12345'
-        data_1 = try1_data.SerializeToString()
-        try1.RC = '000001'
-        try1.SC = '00000'
-        try1.DT = '00'
-        try1.DATA = data_1
-        try1.SIP = '192.168.1.100'
-        try1.DIP = '192.168.1.101'
-        data_2 = try1.SerializeToString()
-        bs = str(data_2, encoding="utf8")
-        self.server_operation("00"+bs)
+        self.server_operation(event_msg)
 
 
     def check_usr(self, event_msg):
-        #生成报文
-        # self.account = event_msg[0]
-        # self.passwd = event_msg[1]
-        # self.textBrowser.append("account:" + self.account + "passwd:" + self.passwd)
-        #/ 生成报文
-        # 这里要数据库比对
         self.sign_message_deal.emit(event_msg)
-        # event_msg = ['1', 'success']
-        # self.slot_send("0001", event_msg)
-        # self.sign_uploadfile.emit(self.account)
 
     def uploadfile(self, filename):
         Filename = "./server_redis_operation/user_json/"+filename+".json"
@@ -94,7 +85,7 @@ class Ui_Server(QObject):
         event_msg = ['', '']
         event_msg[1] = r
         event_msg[0] = str1.__sizeof__()
-        self.sign_send.emit("0002", event_msg)
+        self.sign_send.emit(event_msg)
         f.close()
 
     def server_start(self):
@@ -103,7 +94,7 @@ class Ui_Server(QObject):
         self.ss.listen(QHostAddress('0.0.0.0'), 10086)
         # tcpServer接受到信息，在界面表示出来，就绑定slot_recv，但是转发那一层就不用在这里表示出来了
         self.ss.sign_server_recv.connect(self.slot_recv)
-        self.sign_send.connect(self.ss.sign_send)
+        self.sign_send.connect(self.ss.sign_server_send)
         print("listen")
 
 
@@ -111,17 +102,14 @@ class Ui_Server(QObject):
         _translate = QtCore.QCoreApplication.translate
         Server.setWindowTitle(_translate("Server", "MainWindow"))
 
-    def slot_recv(self, event_id, event_msg):
-        print("finish")
-        print(event_msg)
-        if event_id =="0001" :
-            self.sign_signin.emit(event_msg)
+    def slot_recv(self, event_msg):
+        self.sign_signin.emit(event_msg)
 
 
-    def slot_send(self, event_id, event_msg):
+
+    def slot_send(self, event_msg):
         print("sending……")
-        print(event_msg)
-        self.sign_send.emit(event_id, event_msg)
+        self.sign_send.emit(event_msg)
 
     def server_operation(self, mes_3):
         logging.basicConfig(level=logging.DEBUG)
@@ -129,6 +117,7 @@ class Ui_Server(QObject):
         logging.basicConfig(filename='my.log', level=logging.DEBUG, format=LOG_FORMAT)
         LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
         DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
+
 
         # message = recv()
         # message = type1 + message1
@@ -139,15 +128,14 @@ class Ui_Server(QObject):
 
         mes = im_1.GeneralMessages()
         mes_1 = mes_3
-        mes_4 = bytes(mes_3[2:], encoding="utf8")
+        mes_4 = str.encode(mes_3[2:])
         mes.ParseFromString(mes_4)
-        print(mes_1[0:2], "00")
+        # print(mes_1[0:2], "00")
         if op.eq(mes_1[0:2], "00"):
             # mes = im_1.GeneralMessages()
             mes_send = im_1.GeneralMessages()
             # mes_data = im_1.signup()
             mes_send_DID = im_1.GeneralMessages()
-
             # mes.ParseFromString(message1)
             if op.eq(mes.RC, "000001"):
                 # signup
@@ -160,24 +148,24 @@ class Ui_Server(QObject):
                         redis_1.std_signup(mes_data.ID, mes_data.PSW)
                         logging.info(mes_send)
                         json_1.update_json(mes_data.ID)
-                        # send(mes_send, mes.SIP)
+                        mes_send.DATA = json_1.send_json(mes_data.ID)
                         mes_send_bytes = mes_send.SerializeToString()
-                        event_msg = [bytes.decode(mes_send_bytes), "1"]
-                        self.slot_send("0001", event_msg)
-                        # send json
+                        event_msg = bytes.decode(mes_send_bytes)
+                        self.slot_send("00" + event_msg)
+                        # write json to data(update json)
                     else:
                         mes_send = smc_1.signup(mes, 2)
                         logging.info(mes_send)
                         mes_send_bytes = mes_send.SerializeToString()
-                        event_msg = [bytes.decode(mes_send_bytes), "1"]
-                        self.slot_send("0001", event_msg)
+                        event_msg = bytes.decode(mes_send_bytes)
+                        self.slot_send("00" + event_msg)
                         # send(mes_send, mes.SIP)
                 else:
                     mes_send = smc_1.signup(mes, 3)
                     logging.info(mes_send)
                     mes_send_bytes = mes_send.SerializeToString()
-                    event_msg = [bytes.decode(mes_send_bytes), "1"]
-                    self.slot_send("0001", event_msg)
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
             if op.eq(mes.RC, "001001"):
                 # signin
                 logging.info(mes)
@@ -187,17 +175,17 @@ class Ui_Server(QObject):
                     redis_1.user_login(mes_data.ID, mes_data.PSW)
                     mes_send = smc_1.signup(mes, 1)
                     logging.info(mes_send)
-                    # send(mes_send, mes.SIP)
+                    json_1.login_json(mes_data.ID)
+                    mes_send.DATA = json_1.send_json(mes_data.ID)
                     mes_send_bytes = mes_send.SerializeToString()
-                    event_msg = [bytes.decode(mes_send_bytes), "1"]
-                    self.slot_send("0001", event_msg)
-                    # send json
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
                 else:
                     mes_send = smc_1.login(mes, 2)
                     logging.info(mes_send)
                     mes_send_bytes = mes_send.SerializeToString()
-                    event_msg = [bytes.decode(mes_send_bytes), "1"]
-                    self.slot_send("0001", event_msg)
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
             if op.eq(mes.RC, "000010"):
                 # add friend
                 logging.info(mes)
@@ -208,19 +196,31 @@ class Ui_Server(QObject):
                     json_1.add_friend_json(mes_data.SID, mes_data.DID)
                     json_1.update_json(mes_data.SID)
                     json_1.update_json(mes_data.DID)
+                    mes_send_bytes = mes_send_SID.SerializeToString()
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
                     # send(mes_send_SID)
                     # send double json to SID,DID
                 if op.eq(mes.SC, '00010'):
                     mes_send_SID = smc_1.add_friend(mes, mes_data, 4)
+                    mes_send_bytes = mes_send_SID.SerializeToString()
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
                     # send(mes_send_SID)
 
                 if redis_1.check_id_exists(mes_data.DID):
                     mes_send_DID = smc_1.add_friend(mes, mes_data, 1)
+                    mes_send_bytes = mes_send_DID.SerializeToString()
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
                     # send(mes_send_DID)
 
                 else:
                     mes_send = smc_1.add_friend(mes, mes_data, 3)
                     logging.info(mes_send)
+                    mes_send_bytes = mes_send_DID.SerializeToString()
+                    event_msg = bytes.decode(mes_send_bytes)
+                    self.slot_send("00" + event_msg)
                     # send(mes_send)
             if op.eq(mes.RC, '000011'):
                 # delete friend

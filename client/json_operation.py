@@ -28,7 +28,15 @@ class JsonServer:
         for i in key_user:
             if op.eq(i, ip_1):
                 return r[i]['IP']
-
+    def UpdateJson(self, filename_UJ, data_UJ):
+        with open("./user_json/"+filename_UJ+"/"+filename_UJ+".json", 'w+') as f:
+            f.write(data_UJ)
+        f.close()
+    def CreateJson(self, filename_UJ, data_UJ):
+        os.mkdir("./user_json/"+data_UJ)
+        with open("./user_json/"+filename_UJ+"/"+filename_UJ+".json", 'w+') as f:
+            f.write(data_UJ)
+        f.close()
 
 '''
 json_server1 = json_server()
