@@ -1,0 +1,30 @@
+    def FDInven(self):
+        self.label = QLabel("好友请求")
+        self.friend_ID=QLabel('From ')
+        self.friend_name=QLabel()
+        #self.friend_name.setText(从recv得到申请者的名字)
+
+        self.OK = QPushButton("同意")
+        self.OK.clicked.connect(self.agree)
+        self.NO = QPushButton("不同意")
+        self.NO.clicked.connect(self.disagree)
+        self.addFD = QWidget()
+        layout_addFD = QGridLayout()
+        layout_addFD.addWidget(self.label, 1, 0)
+        layout_addFD.addWidget(self.friend_ID, 2, 0)
+        layout_addFD.addWidget(self.friend_name, 2, 1, 1, 2)
+        layout_addFD.addWidget(self.OK, 3, 1)
+        layout_addFD.addWidget(self.NO, 3, 2)
+        self.addFD.setLayout(layout_addFD)
+       # self.addFD.move(self.pos())
+        self.addFD.resize(200, 133)
+        self.addFD.setWindowFlags(Qt.FramelessWindowHint)
+       # self.paintEvent(self)
+        self.addFD.setStyleSheet("background-color :rgb(253,216,174)")
+        self.addFD.show()
+
+    def agree(self):
+        self.addFD.hide()
+
+    def disagree(self):
+        self.addFD.hide()
