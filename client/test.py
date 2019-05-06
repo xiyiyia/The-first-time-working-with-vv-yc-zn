@@ -12,6 +12,7 @@ from client.data_operation.intergrated_message import IntegrationMessage
 import client.json_operation as JO
 import operator as op
 import data_operation.message_pb2 as PTB
+from client.Mythread import Thread
 import redis
 
 def get_host_ip():
@@ -30,10 +31,10 @@ def get_host_ip():
 
 
 class Login(QWidget):
-
+    sign_send = pyqtSignal(str)
     def __init__(self):
         super().__init__()
-
+        self.thread_start()
         self.initUI()
 
     def initUI(self):
@@ -94,6 +95,14 @@ class Login(QWidget):
         self.setLayout(layout)
         # 密码隐藏
 
+    def thread_start(self):
+        self.thread = Thread()
+        self.thread.hostname = 'localhost'
+        self.thread.start()
+        self.sign_send.connect(self.thread.sign_thread_send)
+        self.thread.sign_thread_recv.connect(self.slot_recv)
+        # self.thread.sign_thread_start.connect(self.update_name)
+
     def yanma(self):
         if self.btn_check.isChecked():
             self.lineedit_password.setEchoMode(QLineEdit.Normal)
@@ -107,44 +116,40 @@ class Login(QWidget):
         self.account = self.lineedit_id.text()
         send_message_data_1 = IntegrationMessage.gm_signup(self.account,self.passwd)
         send_message_1 = IntegrationMessage.general_messages('000001', '00000', '0', send_message_data_1, get_host_ip(), '127.0.0.1')
-        self.sign_slot.emit(send_message_1)
+        self.sign_send.emit("00" + send_message_1)
         # '127.0.0.1'是服务器IP，后期运行更改
 
     # 服务器登陆信息处理
     def SignUp(self, str_1):
-        json_operation = JO.JsonServer()
+        json_operation = JO.JsonServer('0')
         print("check"+self.result)
         check_msg = PTB.GeneralMessages()
-        if op.eq(str_1[0:2], "00"):
-            check_msg.ParseFromString(str.encode(str_1[2:]))
-            if op.eq(check_msg.SC, "66666"):
-                reply = QMessageBox.warning(self, "!", "登录成功", QMessageBox.Yes)
-                json_operation.UpdateJson(self.account, check_msg.DATA)
-                self.close() # 登录成功
-                self.idnewclose() # 跳转到聊天界面
-            if op.eq(check_msg.SC, "00001"):
-                reply = QMessageBox.warning(self, "!", "账号或密码输入错误", QMessageBox.Yes)
-                quit() # 登录失败
-            if op.eq(check_msg.SC, "00100"):
-                reply = QMessageBox.warning(self, "!", "账号不存在", QMessageBox.Yes)
-                quit() # 登录失败
-        else:
-            reply = QMessageBox.warning(self, "!", "Isn't the right message", QMessageBox.Yes)
+        check_msg = str_1
+        if op.eq(check_msg.SC, "66666"):
+            reply = QMessageBox.warning(self, "!", "登录成功", QMessageBox.Yes)
+            json_operation.UpdateJson(self.account, check_msg.DATA)
+            self.close() # 登录成功
+            self.idnewclose() # 跳转到聊天界面
+        if op.eq(check_msg.SC, "00001"):
+            reply = QMessageBox.warning(self, "!", "账号或密码输入错误", QMessageBox.Yes)
+            quit() # 登录失败
+        if op.eq(check_msg.SC, "00100"):
+            reply = QMessageBox.warning(self, "!", "账号不存在", QMessageBox.Yes)
+            quit() # 登录失败
+
     def SignIn(self, str_1):
-        json_operation = JO.JsonServer()
+        json_operation = JO.JsonServer('0')
         print("check" + self.result)
         check_msg = PTB.GeneralMessages()
-        if op.eq(str_1[0:2], "00"):
-            check_msg.ParseFromString(str.encode(str_1[2:]))
-            if op.eq(check_msg.SC, "66666"):
-                reply = QMessageBox.warning(self, "!", "注册成功", QMessageBox.Yes)
-                json_operation.CreateJson(self.account, check_msg.DATA)
-                quit() # 注册成功
-            if op.eq(check_msg.SC, "00100"):
-                reply = QMessageBox.warning(self, "!", "账号不存在", QMessageBox.Yes)
-                quit() # 注册失败
-        else:
-            reply = QMessageBox.warning(self, "!", "Isn't the right message", QMessageBox.Yes)
+        check_msg = str_1
+        if op.eq(check_msg.SC, "66666"):
+            reply = QMessageBox.warning(self, "!", "注册成功", QMessageBox.Yes)
+            json_operation.CreateJson(self.account, check_msg.DATA)
+            quit() # 注册成功
+        if op.eq(check_msg.SC, "00100"):
+            reply = QMessageBox.warning(self, "!", "账号不存在", QMessageBox.Yes)
+            quit() # 注册失败
+
 
     ##########################################################################################
     #接受消息，处理消息
@@ -153,12 +158,15 @@ class Login(QWidget):
         # print(Event_msg)
         self.result = mes_1
         check_msg = PTB.GeneralMessages()
-        check_msg = bytes.decode(mes_1[2:])
-        if op.eq(mes_1[0:2], "00"):
-            if op.eq(check_msg.RC, "010001"):
-                self.SignUp(mes_1)
-            if op.eq(check_msg.RC, "011001"):
-                self.SignIn(mes_1)
+        check_msg.ParseFromString(str.encode(mes_1[2:]))
+        if op.eq(check_msg.RC, "010001") or op.eq(check_msg.RC, "011001"):
+            if op.eq(mes_1[0:2], "00"):
+                if op.eq(check_msg.RC, "010001"):
+                    self.SignUp(check_msg)
+                if op.eq(check_msg.RC, "011001"):
+                    self.SignIn(check_msg)
+        else:
+            reply = QMessageBox.warning(self, "!", "Isn't the right message", QMessageBox.Yes)
     ##########################################################################################
 
     # 创建新的账号
@@ -198,7 +206,7 @@ class Login(QWidget):
         self.account = self.lineedit_id.text()
         send_message_data_1 = IntegrationMessage.gm_signup(self.account,self.passwd)
         send_message_1 = IntegrationMessage.general_messages('001001','00000','0',send_message_data_1,get_host_ip(),'127.0.0.1')
-        self.sign_slot.emit(send_message_1)
+        self.sign_send.emit("00" + send_message_1)
         # '127.0.0.1'是服务器IP，后期运行更改
 
 
@@ -226,7 +234,12 @@ class Login(QWidget):
 
 
 
-class Ui_Form(object):
+class Ui_Form(QObject):
+    sign_send = pyqtSignal(str)
+    def __init__(self):
+        super(Ui_Form, self).__init__()
+        self.thread_start()
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(495, 405)
@@ -269,7 +282,7 @@ class Ui_Form(object):
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.add_friend)
 
-        self.load_friend()
+        # self.load_friend()
 
 
         self.retranslateUi(Form)
@@ -285,7 +298,13 @@ class Ui_Form(object):
         rightMenu.addAction(addAction)
         rightMenu.exec_(QCursor.pos())
     """
-
+    def thread_start(self):
+        self.thread = Thread()
+        self.thread.hostname = 'localhost'
+        self.thread.start()
+        self.sign_send.connect(self.thread.sign_thread_send)
+        self.thread.sign_thread_recv.connect(self.slot_recv)
+        # self.thread.sign_thread_start.connect(self.update_name)
     def click_item(self,item):
         QMessageBox.information(self.listWidget, "ListWidget", "你选择了: " + item.text())
 
@@ -300,7 +319,10 @@ class Ui_Form(object):
     def load_friend(self):
         self.myname = self.getname_line.text()
         jo_1 = JO.JsonServer(self.myname)
-        r = jo_1.friend_list()
+        if self.myname != None:
+            r = jo_1.friend_list(self.myname)
+        else:
+            print("fuck yc")
         #self.listWidget.addItem(account + IP + SIP)   用空格分开 fuck yc
         key_user = r.keys()
         for i in key_user:
@@ -312,10 +334,14 @@ class Ui_Form(object):
     def delete_friend(self,item):
         #row = self.listWidget.currentRow()
         print(self.listWidget.currentItem().text())
+
         self.str = self.listWidget.currentItem().text()
         self.del_name = self.str.split(" ")[0]
+
+        send_message_data_1 = IntegrationMessage.gm_friend(self.del_name, self.myname)
         print(self.del_name)
-        #########self.sign_slot.emit("000011"+self.del_name+get_host_ip())
+        send_message = IntegrationMessage.general_messages('000011', '00000', '0', send_message_data_1, get_host_ip(), '127.0.0.1')
+        self.sign_send.emit("00" + send_message)
 
         #send friend's account to server
         #load client.json
@@ -331,9 +357,9 @@ class Ui_Form(object):
 
     def add_friend(self):
         self.addfriend_name = self.lineEdit.text()
-        send_message_data_1 = IntegrationMessage.gm_friend(self.addfriend_name, get_host_ip())
-        send_message_1 = IntegrationMessage.general_messages('000010', '00000', '0', send_message_data_1, )
-        self.sign_slot.emit('000010'+self.addfriend_name,get_host_ip())
+        send_message_data_1 = IntegrationMessage.gm_friend(self.addfriend_name, self.myname)
+        send_message_1 = IntegrationMessage.general_messages('000010', '00000', '0', send_message_data_1, get_host_ip(), '127.0.0.1')
+        self.sign_send.emit("00" + send_message_1)
     #   self.listWidget.addItem("account ip sip")
         pass
 
@@ -346,19 +372,92 @@ class Ui_Form(object):
         # print(Event_msg)
         self.result = mes_1
         check_msg = PTB.GeneralMessages()
-        check_msg = bytes.decode(mes_1[2:])
-        if op.eq(mes_1[0:2], "00"):
-            if op.eq(check_msg.RC, "010010"):
-                if op.eq(check_msg.SC, "00000"):
-                    self.AddFDRecv(mes_1)
-                else:
-                    self.AddFDSend(mes_1)
-            if op.eq(check_msg.RC, '010011'):
-                self.DelFD(mes_1)
+        check_msg.ParseFromString(str.encode(mes_1[2:]))
+        if op.eq(check_msg.RC, "010010") or op.eq(check_msg.RC, "010011"):
+            if op.eq(mes_1[0:2], "00"):
+                if op.eq(check_msg.RC, '010010'):
+                    if op.eq(check_msg.SC, "00000"):
+                        self.AddFDRecv(check_msg)
+                    else:
+                        self.AddFDSend(check_msg)
+                if op.eq(check_msg.RC, '010011'):
+                    self.DelFD(check_msg)
     ######################################################################################
 
+    def AddFDRecv(self,mes_1):
+        self.FDInven(mes_1)
+    # 好友邀请
+    def FDInven(self, mes_1):
+        self.label = QLabel("好友请求")
+        self.friend_ID = QLabel('From ')
+        self.friend_name = QLabel()
+        #self.friend_name.setText(从recv得到申请者的名字)
 
+        self.OK = QPushButton("同意")
+        self.OK.clicked.connect(self.agree(mes_1))
+        self.NO = QPushButton("不同意")
+        self.NO.clicked.connect(self.disagree(mes_1))
+        self.addFD = QWidget()
+        layout_addFD = QGridLayout()
+        layout_addFD.addWidget(self.label, 1, 0)
+        layout_addFD.addWidget(self.friend_ID, 2, 0)
+        layout_addFD.addWidget(self.friend_name, 2, 1, 1, 2)
+        layout_addFD.addWidget(self.OK, 3, 1)
+        layout_addFD.addWidget(self.NO, 3, 2)
+        self.addFD.setLayout(layout_addFD)
+        # self.addFD.move(self.pos())
+        self.addFD.resize(200, 133)
+        self.addFD.setWindowFlags(Qt.FramelessWindowHint)
+        # self.paintEvent(self)
+        self.addFD.setStyleSheet("background-color :rgb(253,216,174)")
+        self.addFD.show()
 
+    def agree(self,mes_1):
+        self.addFD.hide()
+        json_operation = JO.JsonServer('0')
+        print("check" + self.result)
+        # check_msg = PTB.GeneralMessages()
+        check_msg_data = PTB.GeneralMessages()
+        check_msg = mes_1
+        check_msg_data.ParseFromString(str.encode(check_msg.DATA))
+        json_operation.add_friend_json(self.myname, check_msg_data.SIP, check_msg_data.DIP)
+        send_message_1 = IntegrationMessage.general_messages('000010', '66666', '0', check_msg.DATA, get_host_ip(), '127.0.0.1')
+        self.sign_send.emit("00" + send_message_1)
+
+    def disagree(self,mes_1):
+        self.addFD.hide()
+        send_message_1 = IntegrationMessage.general_messages('000010', '00010', '0', mes_1.DATA, get_host_ip(),
+                                                             '127.0.0.1')
+        self.sign_send.emit("00" + send_message_1)
+
+    def AddFDSend(self, mes_1):
+        self.addfriend_name = self.lineEdit.text()
+        json_operation = JO.JsonServer('0')
+        print("check" + self.result)
+        check_msg = PTB.GeneralMessages()
+        check_msg = mes_1
+        if op.eq(check_msg.SC, "66666"):
+            reply = QMessageBox.warning(self.listWidget, "!", "添加成功", QMessageBox.Yes)
+            json_operation.UpdateJson(self.addfriend_name, check_msg.DATA)
+            self.load_friend()
+            quit() # 注册成功
+        if op.eq(check_msg.SC, "00010"):
+            reply = QMessageBox.warning(self.listWidget, "!", "拒绝申请", QMessageBox.Yes)
+            quit() # 注册失败
+    def DelFD(self, mes_1):
+        self.addfriend_name = self.lineEdit.text()
+        json_operation = JO.JsonServer('0')
+        print("check" + self.result)
+        check_msg = PTB.gm_friend()
+        check_msg.ParseFromString(str.encode(mes_1.DATA))
+        if op.eq(mes_1.SC, "66666"):
+            reply = QMessageBox.warning(self.listWidget, "!", "删除成功", QMessageBox.Yes)
+            json_operation.del_friend_json(check_msg.DIP, check_msg.SIP)
+            self.load_friend()
+            quit() # 注册成功
+        if op.eq(mes_1.SC, "00100"):
+            reply = QMessageBox.warning(self.listWidget, "!", "拒绝删除请求", QMessageBox.Yes)
+            quit() # 注册失败
 if __name__ == '__main__':
     # 创建页面实例对象
     app = QApplication(sys.argv)

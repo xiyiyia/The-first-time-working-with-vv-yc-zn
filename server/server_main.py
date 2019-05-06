@@ -12,7 +12,7 @@ from PyQt5.QtCore import pyqtSignal, QObject, QDataStream, QFile, Qt
 import json
 import server.server_redis_operation.json_operation as json_operation
 import server.server_redis_operation.data_operation.intergrated_message as intergrated_message
-import server.server_redis_operation.data_operation.message_pb2 as message_pb2
+import server.server_redis_operation.data_operation.message_pb2 as im_1
 import operator as op
 import server.server_redis_operation.redis_operation as redis_operation
 import server.server_redis_operation.server_message_creat as server_message_creat
@@ -34,7 +34,7 @@ class Ui_Server(QObject):
     sign_message_deal = pyqtSignal(str)
 
     def setupUi(self, Server):
-
+        '''
         self.r = redis.Redis(host='127.0.0.1', port=6379, decode_responses=False)
         self.the_user_data = SRPTB.User()
         self.the_user_data.ID = '1024'
@@ -43,7 +43,7 @@ class Ui_Server(QObject):
         self.the_user_data.STD = 0
         self.r.set('1024', self.the_user_data.SerializeToString())
         self.r.save()
-
+        '''
         Server.setObjectName("Server")
         Server.resize(431, 322)
         self.centralwidget = QtWidgets.QWidget(Server)
@@ -103,7 +103,7 @@ class Ui_Server(QObject):
         Server.setWindowTitle(_translate("Server", "MainWindow"))
 
     def slot_recv(self, event_msg):
-        self.sign_signin.emit(event_msg)
+        self.server_operation(event_msg)
 
 
 
@@ -118,20 +118,15 @@ class Ui_Server(QObject):
         LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
         DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"
 
-
-        # message = recv()
-        # message = type1 + message1
         redis_1 = redis_operation.RedisOperation()
-        im_1 = message_pb2
         smc_1 = server_message_creat.ServerMessageCreator()
         json_1 = json_operation.JsonServer()
 
         mes = im_1.GeneralMessages()
-        mes_1 = mes_3
-        mes_4 = str.encode(mes_3[2:])
-        mes.ParseFromString(mes_4)
-        # print(mes_1[0:2], "00")
-        if op.eq(mes_1[0:2], "00"):
+        # mes_4 = str.encode(mes_3[2:])
+        mes.ParseFromString(str.encode(mes_3[2:]))
+        # print(mes_3[0:2], "00")
+        if op.eq(mes_3[0:2], "00"):
             # mes = im_1.GeneralMessages()
             mes_send = im_1.GeneralMessages()
             # mes_data = im_1.signup()
@@ -149,22 +144,20 @@ class Ui_Server(QObject):
                         logging.info(mes_send)
                         json_1.update_json(mes_data.ID)
                         mes_send.DATA = json_1.send_json(mes_data.ID)
-                        mes_send_bytes = mes_send.SerializeToString()
-                        event_msg = bytes.decode(mes_send_bytes)
+                        event_data = mes_send.SerializeToString()
+                        event_msg = bytes.decode(event_data)
                         self.slot_send("00" + event_msg)
                         # write json to data(update json)
                     else:
                         mes_send = smc_1.signup(mes, 2)
                         logging.info(mes_send)
-                        mes_send_bytes = mes_send.SerializeToString()
-                        event_msg = bytes.decode(mes_send_bytes)
+                        event_msg = bytes.decode(mes_send.SerializeToString())
                         self.slot_send("00" + event_msg)
                         # send(mes_send, mes.SIP)
                 else:
                     mes_send = smc_1.signup(mes, 3)
                     logging.info(mes_send)
-                    mes_send_bytes = mes_send.SerializeToString()
-                    event_msg = bytes.decode(mes_send_bytes)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
                     self.slot_send("00" + event_msg)
             if op.eq(mes.RC, "001001"):
                 # signin
@@ -196,15 +189,14 @@ class Ui_Server(QObject):
                     json_1.add_friend_json(mes_data.SID, mes_data.DID)
                     json_1.update_json(mes_data.SID)
                     json_1.update_json(mes_data.DID)
-                    mes_send_bytes = mes_send_SID.SerializeToString()
-                    event_msg = bytes.decode(mes_send_bytes)
+                    mes_send.DATA = json_1.send_json(mes_data.ID)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
                     self.slot_send("00" + event_msg)
                     # send(mes_send_SID)
                     # send double json to SID,DID
                 if op.eq(mes.SC, '00010'):
                     mes_send_SID = smc_1.add_friend(mes, mes_data, 4)
-                    mes_send_bytes = mes_send_SID.SerializeToString()
-                    event_msg = bytes.decode(mes_send_bytes)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
                     self.slot_send("00" + event_msg)
                     # send(mes_send_SID)
 
@@ -218,8 +210,7 @@ class Ui_Server(QObject):
                 else:
                     mes_send = smc_1.add_friend(mes, mes_data, 3)
                     logging.info(mes_send)
-                    mes_send_bytes = mes_send_DID.SerializeToString()
-                    event_msg = bytes.decode(mes_send_bytes)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
                     self.slot_send("00" + event_msg)
                     # send(mes_send)
             if op.eq(mes.RC, '000011'):
@@ -233,12 +224,19 @@ class Ui_Server(QObject):
                     json_1.add_friend_json(mes_data.SID, mes_data.DID)
                     json_1.update_json(mes_data.SID)
                     json_1.update_json(mes_data.DID)
+                    mes_send.DATA = json_1.send_json(mes_data.SID)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
+                    self.slot_send("00" + event_msg)
                     # send(mes_send)
                     # send double json to SID,DID
                 else:
                     mes_send = smc_1.add_friend(mes, mes_data, 2)
                     logging.info(mes_send)
+                    event_msg = bytes.decode(mes_send.SerializeToString())
+                    self.slot_send("00" + event_msg)
                     # send(mes_send)
+        else:
+            logging.info("啥玩意？")
             '''
             if op.eq(mes.RC, '010001'):
             if op.eq(mes.RC, '010001'):

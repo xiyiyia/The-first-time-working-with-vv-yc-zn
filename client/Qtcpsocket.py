@@ -7,8 +7,8 @@ SIZE_OF_UINT16 = 2
 
 
 class MyTcpsocket(QTcpSocket):
-    sign_send = pyqtSignal(str, str)
-    sign_recv = pyqtSignal(str, str)
+    sign_send = pyqtSignal(str)
+    sign_recv = pyqtSignal(str)
     MIP = ''
 
     def __init__(self, parent=None):
@@ -30,16 +30,16 @@ class MyTcpsocket(QTcpSocket):
                 break
             if nextblock_size < min_block_size:
                 break
-            Event_id = stream.readQString()
+            # Event_id = stream.readQString()
             Event_msg = stream.readQString()
-            print(Event_id, Event_msg)
-            self.sign_recv.emit(Event_id, Event_msg)
+            print(Event_msg)
+            self.sign_recv.emit(Event_msg)
 
-    def slot_send(self, event_id, event_msg):
+    def slot_send(self, event_msg):
         reply = QByteArray()
         stream = QDataStream(reply, QIODevice.WriteOnly)
         stream.writeUInt16(0)
-        stream.writeQString(event_id)
+        # stream.writeQString(event_id)
         stream.writeQString(event_msg)
         stream.writeUInt16(0)
         stream.device().seek(0)

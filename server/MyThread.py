@@ -5,8 +5,8 @@ from server.tcpsocket import TcpSocket
 
 class Thread(QThread):
 
-    sign_thread_recv = pyqtSignal(str, str)
-    sign_thread_send = pyqtSignal(str, str)
+    sign_thread_recv = pyqtSignal(str)
+    sign_thread_send = pyqtSignal(str)
 
     def __init__(self, socket_id, parent=None):
         super(Thread, self).__init__(parent)

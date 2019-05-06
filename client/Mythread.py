@@ -6,8 +6,8 @@ from client.Qtcpsocket import MyTcpsocket
 
 class Thread(QThread):
 
-    sign_thread_recv = pyqtSignal(str, str)
-    sign_thread_send = pyqtSignal(str, str)
+    sign_thread_recv = pyqtSignal(str)
+    sign_thread_send = pyqtSignal(str)
     sign_thread_start = pyqtSignal(str)
     hostname = ''
 

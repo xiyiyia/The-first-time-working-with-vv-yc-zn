@@ -6,8 +6,8 @@ SIZE_OF_UINT16 = 2
 
 class TcpSocket(QTcpSocket):
 
-    sign_recv = pyqtSignal(str, str)
-    sign_send = pyqtSignal(str, str)
+    sign_recv = pyqtSignal(str)
+    sign_send = pyqtSignal(str)
 
     def __init__(self, socket_id, parent=None):
         super(TcpSocket, self).__init__(parent)
@@ -34,11 +34,11 @@ class TcpSocket(QTcpSocket):
             # 如果 nextblock_size 比这个还小说明接受错误
             if nextblock_size <= min_block_size:
                 break
-            event_id = stream.readQString()
+            # event_id = stream.readQString()
             event_msg = stream.readQString()
-            self.sign_recv.emit(event_id, event_msg)
+            self.sign_recv.emit(event_msg)
 
-    def slot_send(self, event_id, event_msg):
+    def slot_send(self, event_msg):
         print("send")
         print(event_msg)
         # 定义一个字节列表
@@ -47,7 +47,7 @@ class TcpSocket(QTcpSocket):
         stream = QDataStream(reply, QIODevice.WriteOnly)
         # 为什么接受的最小长度是2个字节，是因为这里收尾都写入了0
         stream.writeUInt16(0)
-        stream.writeQString(event_id)
+        # stream.writeQString(event_id)
         stream.writeQString(event_msg)
         stream.writeUInt16(0)
 

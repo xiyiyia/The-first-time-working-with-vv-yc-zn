@@ -12,29 +12,29 @@ class JsonServer:
     @staticmethod
     def login_json(id_1):
         os.mkdir("./user_json/"+id_1)
-        with open("./user_json/"+id_1+"/"+id_1+".json", "w+") as f:
+        with open("./server_redis_operation/user_json/"+id_1+"/"+id_1+".json", "w+") as f:
             json.dump({id_1: {'STD': 0, 'IP': '0'}}, f, indent=4)
         f.close()
 
     @staticmethod
     def add_friend_json(send_1, receive_1):
-        with open("./user_json/"+send_1+"/"+send_1+".json", 'r') as f:
+        with open("./server_redis_operation/user_json/"+send_1+"/"+send_1+".json", 'r') as f:
             # print("Load str file from {}".format(str_file))
             str1 = f.read()
             r = json.loads(str1)
             # r[send_1]['count'] += 1
         f.close()
-        with open("./user_json/" + send_1 + "/" + send_1 + ".json", 'w+') as f:
+        with open("./server_redis_operation/user_json/" + send_1 + "/" + send_1 + ".json", 'w+') as f:
             r[receive_1] = {}
             r[receive_1]['STD'] = 0
             r[receive_1]['IP'] = '0'
             json.dump(r, f, indent=4, ensure_ascii=False)
         f.close()
-        with open("./user_json/"+receive_1+"/"+receive_1+".json", 'r') as f:
+        with open("./server_redis_operation/user_json/"+receive_1+"/"+receive_1+".json", 'r') as f:
             str1 = f.read()
             s = json.loads(str1)
         f.close()
-        with open("./user_json/" + receive_1 + "/" + receive_1 + ".json", 'w+') as f:
+        with open("./server_redis_operation/user_json/" + receive_1 + "/" + receive_1 + ".json", 'w+') as f:
             s[send_1] = {}
             s[send_1]['STD'] = 0
             s[send_1]['IP'] = '0'
@@ -43,27 +43,29 @@ class JsonServer:
 
     @staticmethod
     def del_friend_json(send_1, receive_1):
-        with open("./user_json/" + send_1 + "/" + send_1 + ".json", 'r') as f:
+        with open("./server_redis_operation/user_json/" + send_1 + "/" + send_1 + ".json", 'r') as f:
             # print("Load str file from {}".format(str_file))
             str1 = f.read()
             r = json.loads(str1)
             # r[send_1]['count'] += 1
         f.close()
-        with open("./user_json/" + send_1 + "/" + send_1 + ".json", 'w+') as f:
+        with open("./server_redis_operation/user_json/" + send_1 + "/" + send_1 + ".json", 'w+') as f:
             del r[receive_1]
             json.dump(r, f, indent=4, ensure_ascii=False)
         f.close()
-        with open("./user_json/" + receive_1 + "/" + receive_1 + ".json", 'r') as f:
+        with open("./server_redis_operation/user_json/" + receive_1 + "/" + receive_1 + ".json", 'r') as f:
             str1 = f.read()
             s = json.loads(str1)
         f.close()
-        with open("./user_json/" + receive_1 + "/" + receive_1 + ".json", 'w+') as f:
+        with open("./server_redis_operation/user_json/" + receive_1 + "/" + receive_1 + ".json", 'w+') as f:
             del s[send_1]
             json.dump(s, f, indent=4, ensure_ascii=False)
         f.close()
 
     def update_json(self, id_1):
-        with open("./user_json/"+id_1+"/"+id_1+".json", 'r') as f:
+        # os.path.normpath()
+        file_path =  "./server_redis_operation/user_json/"+id_1+"/"+id_1+".json"
+        with open(file_path, 'r') as f:
             str1 = f.read()
             r = json.loads(str1)
         f.close()
@@ -76,9 +78,18 @@ class JsonServer:
             if satiation_1 == 1 and r[i]['STD'] == 0:
                 r[i]['STD'] = 1
                 r[i]['IP'] = ip_1
-        with open("./user_json/"+id_1+"/"+id_1+".json", 'w+') as f:
+        with open("./server_redis_operation/user_json/"+id_1+"/"+id_1+".json", 'w+') as f:
             json.dump(r, f, indent=4, ensure_ascii=False)
         f.close()
+
+    def send_json(selfself, filename_sj):
+        with open("./server_redis_operation/user_json/" + filename_sj + "/" + filename_sj + ".json", 'r') as f:
+            event_msg = f.read()
+            msg = json.loads(event_msg)
+        f.close()
+        # print(json_str)
+        # print(event_msg)
+        return repr(msg)
 
 
 '''

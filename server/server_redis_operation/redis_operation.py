@@ -32,7 +32,7 @@ class RedisOperation:
         self.the_user_data.STD = 1
         self.the_user_data.IP = ip_1
         self.r.set(id_1, self.the_user_data.SerializeToString())
-        self.r.save()
+        # self.r.save()
 
     def check_std(self, id_1):
         self.the_user_data.ParseFromString(self.r.get(id_1))
