@@ -1,6 +1,7 @@
-import des_decryption as des_de
-import des_encryption as des_en
-import Tstr as tostr
+import gayhub.kerberos.des_encryption as des_en
+import gayhub.kerberos.des_decryption as des_de
+import gayhub.kerberos.Tstr as tostr
+import gayhub.kerberos.UI as ui
 import socket
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMessageBox, QLabel, QCheckBox
 import sys
@@ -52,8 +53,10 @@ class QW(QWidget):
 
         self.show()
     def aboutMC(self):
-        QMessageBox.about(self, '明文和密文显示',
-                          'message1 = '+self.message1+
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
+                        'message1 = '+self.message1+
                           '\nmessage2_Ciphertext = '+self.message2_Ciphertext+
                           '\nmessage2_Plaintext = '+self.message2_Plaintext+
                           '\nmessage3 = ' + self.message3 +
@@ -62,8 +65,11 @@ class QW(QWidget):
                           '\nmessage5 = ' + self.message5 +
                           '\nmessage6_Ciphertext=\n'+self.message6_Ciphertext+
                           '\nmessage6_Plaintext=\n'+self.message6_Plaintext)
+        self.form.show()
     def aboutdetail(self):
-        QMessageBox.about(self,'细节的显示',
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
                           'message1 = ' + self.message1 +
                           '\nmessage2_Ciphertext = ' + self.message2_Ciphertext +
                           '\nmessage2_Plaintext = ' + self.message2_Plaintext +
@@ -74,7 +80,7 @@ class QW(QWidget):
                           '\nmessage6_Ciphertext=\n' + self.message6_Ciphertext +
                           '\nmessage6_Plaintext=\n' + self.message6_Plaintext
                           )
-
+        self.form.show()
     def fromandgoto(self):
 
         QMessageBox.about(self,'来源和去向','这是Client对于加密解密的显示！！！')
@@ -151,9 +157,10 @@ def CLIENT():
     message2 = s.recv(1024)
     message2 = message2.decode()
     print("message2 = ",message2)
-    s.close()"""
+    s.close()
+    """
 
-    message2 = 'D3A41D74DCE667CAD3D397336CC8B2EE06A83080661277324F876410EE84ABECC6B0D269AD00758D98B3A781D438F4A6D937FF4846783646DCB15C599E2C137B2D05A915E1BC78D60714C9C1477EC21E3548C7C732258EABAFE786C2F56DEEB6F81F416ADB8E3CFBFDFEBAC756938898C4C22A9EAEAE084BD6A7A513DDF0B8D0F4E418C00D3AE157D17B2A230E64D2A84AA3FCDF931C1BC5D1250522F2248F8D4816C86CB5DAEB1FEF5C3DB8F84256B4E26239A103B0D406D28D90703D277F2DAD0E6439F7333D2E47AAA1EB7B5E0CDCE9AB683C1432B9B0'
+    message2 = 'D3A41D74DCE667CAD3D397336CC8B2EE06A8308066127732963DDC58C3F3DF748B228F7BA7E3BE4498B3A781D438F4A6D937FF4846783646DCB15C599E2C137B4C6BD9E917992E6C1DE2F71066632786C9ECEE38802F6F2F16D117AF055D5D2BBA65D636AC72197B2D153F9464FCC9D25297DE32E7C88507BF8D27EC72472C15F4E418C00D3AE157D17B2A230E64D2A84AA3FCDF931C1BC5D1250522F2248F8D63D6C82291CEF3855D2734C685D0EDF2277144ED594DE71E9694E606D0D8AFB4AD0E6439F7333D2E47AAA1EB7B5E0CDCE9AB683C1432B9B0'
     QW.message2_Ciphertext = message2
     message2 = des_de.test(message2, Key_c)
     QW.message2_Plaintext = message2
@@ -196,7 +203,7 @@ def CLIENT():
     print("message4 = ", message4)
     tgs.close()"""
     # 从TGS接收到message4
-    message4 = '49A728EEEC2411B0D76FA69341FB845BEA16784472B24B6150E3E1170BF397C17C358F1F52DA4E7A33575AC1B0E26CD9BDF61603A6079C03648F48FD5D77180D5A7A15C1AA4D2F37BBE8E0DA85F4272C8C9AA4474D1512E35BE1F8CAF1CF1F068C29AD49EB7340CDA749078B3FFF743630CF7A311678C55F65197A570A5E4DA5F7242F37BD68F4A85DCED3BFB43AA654A51CD2E64D6242A6596922B1756A635313E24EB0456C244FADEDD8DA50377DF567994303910A8CA6CC130C743E83F60867D77BE9F9CC2B0E7358F0ED7796932F'
+    message4 = '60E1C1DEE89D50B5D76FA69341FB845BEA16784472B24B617BE5BA3DC2EEF8361EBB8BC4B2E29F03245E7E6D4E1E395DCA003EA2D338A5B8ED4513868C3B44B6D97E9E0137F47BB9FAA319BB4DFAD05F12B14A2E081ED644BDEC148EF5C878E63995026084D974DE320273D2B4FFC3C2D688C2A4A4946A5C65197A570A5E4DA5F7242F37BD68F4A85DCED3BFB43AA654A51CD2E64D6242A64FBAEFFB277B8AC7F0049D4E7C2692584AF898BD0826F7C9BA2EFDF1DD8A8262CC130C743E83F60867D77BE9F9CC2B0E7358F0ED7796932F'
     QW.message4_Ciphertext = message4
     message4 = des_de.test(message4, Key_ctgs)
     QW.message4_Plaintext = message4

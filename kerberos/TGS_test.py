@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMessageBox, QLabel, QCheckBox
 import sys
-import des_encryption as des_en
-import des_decryption as des_de
-import Tstr as tostr
+import kerberos.des_encryption as des_en
+import kerberos.des_decryption as des_de
+import kerberos.Tstr as tostr
+import kerberos.UI as ui
 import time
 import socket
 import random
@@ -29,17 +30,6 @@ class QW(QWidget):
         self.initUI()
 
     def initUI(self):
-        #reply = QMessageBox.critical(self, '提醒', '这是一个提醒消息对话框', QMessageBox.Retry , QMessageBox.Retry)
-        """msgBox = QMessageBox()
-        msgBox.setWindowTitle('提醒')
-        msgBox.setText("这是一条来自AS发送到Client的报文！！！")
-        msgBox.setStandardButtons(QMessageBox.Retry)
-        msgBox.setDefaultButton(QMessageBox.Ignore)
-        msgBox.setDetailedText('message2_Plaintext = '+self.message2_Plaintext+ '\n'+ 'Key_client = '+self.Key_client +'message2_Ciphertext = '+self.message2_Ciphertext +'\n\n'+'ticket_tgs_plaintext = '+self.ticket_tgs_Plaintext+'\n'+'ticket_tgs_ciphertext = '+self.ticket_tgs_Ciphertext)
-        reply = msgBox.exec()
-
-        if reply == QMessageBox.Ignore:
-            self.la.setText('你选择了Ignore！')"""
 
         self.setGeometry(300, 300, 330, 300)
         self.setWindowTitle('TGSTGSTGSTGS')
@@ -57,12 +47,19 @@ class QW(QWidget):
 
         self.show()
     def aboutMC(self):
-        QMessageBox.about(self, '明文和密文显示','message4_Ciphertext=\n'+self.message4_Ciphertext+'\nmessage4_Plaintext=\n'+self.message4_Plaintext)
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
+                        'message4_Ciphertext=\n'+self.message4_Ciphertext+'\nmessage4_Plaintext=\n'+self.message4_Plaintext)
+        self.form.show()
     def aboutdetail(self):
-        QMessageBox.about(self,'细节的显示','message4_Plaintext = '+self.message4_Plaintext+'\nKey_ctgs = '+self.Key_ctgs +'\nmessage4_Ciphertext = '+self.message4_Ciphertext +'\n\n'
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,'message4_Plaintext = '+self.message4_Plaintext+'\nKey_ctgs = '+self.Key_ctgs +'\nmessage4_Ciphertext = '+self.message4_Ciphertext +'\n\n'
                           +'ticket_tgs_Ciphertext = '+self.ticket_tgs_Ciphertext+'\nKey_tgs = '+self.Key_tgs+'\nticket_tgs_plaintext = '+self.ticket_tgs_Plaintext+'\n\n'
                           +'Authentication_c_Ciphertext = '+self.Authentication_c_Ciphertext+'\nKey_ctgs = '+self.Key_ctgs+'\nAuthentiction_c_Plaintext = '+self.Authentication_c_Plaintext+'\n\n'
                           +'ticket_server_plaintext = '+self.ticket_server_Plaintext+'\nKey_server = '+self.Key_server+'\nticket_server_ciphertext = '+self.ticket_server_Ciphertext)
+        self.form.show()
 
     def fromandgoto(self):
 

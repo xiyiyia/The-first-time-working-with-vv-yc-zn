@@ -1,6 +1,7 @@
-import des_decryption as des_de
-import des_encryption as des_en
-import Tstr as tostr
+import gayhub.kerberos.des_encryption as des_en
+import gayhub.kerberos.des_decryption as des_de
+import gayhub.kerberos.Tstr as tostr
+import gayhub.kerberos.UI as ui
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMessageBox, QLabel, QCheckBox
 import sys
 import socket
@@ -23,17 +24,6 @@ class QW(QWidget):
         self.initUI()
 
     def initUI(self):
-        #reply = QMessageBox.critical(self, '提醒', '这是一个提醒消息对话框', QMessageBox.Retry , QMessageBox.Retry)
-        """msgBox = QMessageBox()
-        msgBox.setWindowTitle('提醒')
-        msgBox.setText("这是一条来自AS发送到Client的报文！！！")
-        msgBox.setStandardButtons(QMessageBox.Retry)
-        msgBox.setDefaultButton(QMessageBox.Ignore)
-        msgBox.setDetailedText('message2_Plaintext = '+self.message2_Plaintext+ '\n'+ 'Key_client = '+self.Key_client +'message2_Ciphertext = '+self.message2_Ciphertext +'\n\n'+'ticket_tgs_plaintext = '+self.ticket_tgs_Plaintext+'\n'+'ticket_tgs_ciphertext = '+self.ticket_tgs_Ciphertext)
-        reply = msgBox.exec()
-
-        if reply == QMessageBox.Ignore:
-            self.la.setText('你选择了Ignore！')"""
 
         self.setGeometry(300, 300, 330, 300)
         self.setWindowTitle('ServerServerServer')
@@ -51,17 +41,29 @@ class QW(QWidget):
 
         self.show()
     def aboutMC(self):
-        QMessageBox.about(self, '明文和密文显示','message6_Ciphertext=\n'+self.message6_Ciphertext+'\nmessage6_Plaintext=\n'+self.message6_Plaintext)
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
+                        'message6_Ciphertext=\n'+self.message6_Ciphertext+
+                        '\nmessage6_Plaintext=\n'+self.message6_Plaintext)
+        self.form.show()
     def aboutdetail(self):
-        QMessageBox.about(self,'细节的显示','message6_Plaintext = '+self.message6_Plaintext+'\nKey_cv = '+self.Key_cv +'\nmessage6_Ciphertext = '+self.message6_Ciphertext +'\n\n'
-                          +'Authentication_c_Ciphertext = '+self.Authentication_c_Ciphertext+'\nKey_cv = '+self.Key_cv+'\nAuthentiction_c_Plaintext = '+self.Authentication_c_Plaintext+'\n\n'
-                          +'ticket_server_plaintext = '+self.ticket_server_Plaintext+'\nKey_server = '+self.Key_server+'\nticket_server_ciphertext = '+self.ticket_server_Ciphertext)
-
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
+                        'message6_Plaintext = '+self.message6_Plaintext+
+                        '\nKey_cv = '+self.Key_cv +
+                        '\nmessage6_Ciphertext = '+self.message6_Ciphertext +'\n\n'
+                          +'Authentication_c_Ciphertext = '+self.Authentication_c_Ciphertext+
+                        '\nKey_cv = '+self.Key_cv+
+                        '\nAuthentiction_c_Plaintext = '+self.Authentication_c_Plaintext+'\n\n'
+                          +'ticket_server_plaintext = '+self.ticket_server_Plaintext+
+                        '\nKey_server = '+self.Key_server+
+                        '\nticket_server_ciphertext = '+self.ticket_server_Ciphertext)
+        self.form.show()
     def fromandgoto(self):
 
         QMessageBox.about(self,'来源和去向','这是Server对于加密解密的显示！！！')
-
-
 
 
 def Server_to_Client(ts5, Key_cv):
@@ -83,7 +85,7 @@ def SERVER():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     localhost = socket.gethostname()
     port = 10002
-    s.bind(("localhost", port))
+    s.bind(("0.0.0.0", port))
     s.listen(5)
 
     cs, address = s.accept()

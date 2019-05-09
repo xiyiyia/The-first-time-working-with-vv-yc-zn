@@ -15,7 +15,7 @@ def do_redis():
     r.set('Key_TGS','cdefghi')  # AS和TGS之间的会话对称密钥
     r.set('Key_ctgs', 'defghij')
     r.set('Key_cv', 'efghijk')
-    r.set('ip_Client','172.29.188.170')  # Client的标识，采用ip地址来表示
+    r.set('ip_Client','172.20.10.2')  # Client的标识，采用ip地址来表示
     r.set('ip_TGS','192.168.43.203')  # TGS的标识，采用ip地址来表示
     r.set('ip_Server','192.168.43.204')  # Server的标识，采用ip地址来表示
 

@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QMessageBox, QApplication
-import des_encryption as des_en
-import Tstr as tostr
+import kerberos.des_encryption as des_en
+import kerberos.Tstr as tostr
 import redis
 import time
 import socket

@@ -1,6 +1,6 @@
-import des_decryption as des_de
-import des_encryption as des_en
-import Tstr as tostr
+import gayhub.des_decryption as des_de
+import kerberos.des_encryption as des_en
+import kerberos.Tstr as tostr
 import socket
 import time
 

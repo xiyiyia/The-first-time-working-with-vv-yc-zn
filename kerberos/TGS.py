@@ -1,6 +1,6 @@
-import des_encryption as des_en
-import des_decryption as des_de
-import Tstr as tostr
+import kerberos.des_encryption as des_en
+import kerberos.des_decryption as des_de
+import kerberos.Tstr as tostr
 import time
 import socket
 import random

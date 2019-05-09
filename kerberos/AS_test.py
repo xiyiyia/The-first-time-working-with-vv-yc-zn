@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QMessageBox, QLabel, QCheckBox
 from PyQt5.QtGui import QPixmap
 import sys
-import des_encryption as des_en
-import Tstr as tostr
+import kerberos.des_encryption as des_en
+import kerberos.Tstr as tostr
 import redis
 import time
 import socket
-
+import kerberos.UI as ui
 
 class QW(QWidget):
     message2_Plaintext = ''
@@ -49,11 +49,17 @@ class QW(QWidget):
 
         self.show()
     def aboutMC(self):
-        QMessageBox.about(self, '明文和密文显示','message2_Ciphertext = '+self.message2_Ciphertext + '\n'+'message2_Plaintext = '+self.message2_Plaintext)
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,'message2_Ciphertext = '+self.message2_Ciphertext + '\n'+'message2_Plaintext = '+self.message2_Plaintext)
+        self.form.show()
     def aboutdetail(self):
-        QMessageBox.about(self,'细节的显示','message2_Plaintext = '+self.message2_Plaintext+ '\n'+ 'Key_client = '+self.Key_client +'message2_Ciphertext = '+self.message2_Ciphertext +'\n\n'+'ticket_tgs_plaintext = '+self.ticket_tgs_Plaintext+'\n'+'ticket_tgs_ciphertext = '+self.ticket_tgs_Ciphertext)
+        self.form = QWidget()
+        self.ui = ui.show_Kerberos()
+        self.ui.setupUi(self.form,
+                        'message2_Plaintext = '+self.message2_Plaintext+ '\n'+ 'Key_client = '+self.Key_client +'message2_Ciphertext = '+self.message2_Ciphertext +'\n\n'+'ticket_tgs_plaintext = '+self.ticket_tgs_Plaintext+'\n'+'ticket_tgs_ciphertext = '+self.ticket_tgs_Ciphertext)
+        self.form.show()
     def fromandgoto(self):
-
         QMessageBox.about(self,'来源和去向','这是一条来自AS发送到Client的报文！！！')
 
 
